@@ -1,5 +1,6 @@
 package com.wishsalad.wishimu;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -33,13 +34,13 @@ public class UdpSenderService extends Service implements SensorEventListener {
     private final IBinder mBinder = new MyBinder();
     private final DatagramPacket p = new DatagramPacket(new byte[]{}, 0);
     private final byte[] buf = new byte[50];
-    float[] acc = new float[]{0, 0, 0};
-    float[] mag = new float[]{0, 0, 0};
-    float[] gyr = new float[]{0, 0, 0};
-    float[] imu = new float[]{0, 0, 0};
-    float[] rotationVector = new float[3];
-    float[] R_ = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-    float[] I = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+    final float[] acc = new float[]{0, 0, 0};
+    final float[] mag = new float[]{0, 0, 0};
+    final float[] gyr = new float[]{0, 0, 0};
+    final float[] imu = new float[]{0, 0, 0};
+    final float[] rotationVector = new float[3];
+    final float[] R_ = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+    final float[] I = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
     DatagramSocket socket;
     byte deviceIndex;
     boolean sendOrientation;
@@ -54,14 +55,13 @@ public class UdpSenderService extends Service implements SensorEventListener {
     private final BroadcastReceiver screen_off_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 register_sensors();
             }
         }
     };
     private WifiManager.WifiLock wifiLock;
     private PowerManager.WakeLock wakeLock;
-    private String lastError;
 
     public void register_sensors() {
         sensorManager.unregisterListener(this);
@@ -93,33 +93,6 @@ public class UdpSenderService extends Service implements SensorEventListener {
                             sampleRate);
                 }
             }
-        }
-    }
-
-    public String getLastError() {
-        synchronized (this) {
-            return lastError;
-        }
-    }
-
-    private void setLastError(String e) {
-        synchronized (this) {
-            lastError = e;
-        }
-    }
-
-    public String debug(float[] acc_, float[] mag_, float[] gyr_, float[] imu_) {
-        synchronized (this) {
-            System.arraycopy(acc, 0, acc_, 0, 3);
-            System.arraycopy(mag, 0, mag_, 0, 3);
-            System.arraycopy(gyr, 0, gyr_, 0, 3);
-            System.arraycopy(imu, 0, imu_, 0, 3);
-
-            String err = lastError;
-
-            lastError = null;
-
-            return err;
         }
     }
 
@@ -166,7 +139,7 @@ public class UdpSenderService extends Service implements SensorEventListener {
         if (worker != null) {
             try {
                 worker.join();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
         }
     }
@@ -187,7 +160,7 @@ public class UdpSenderService extends Service implements SensorEventListener {
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);
+                0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new Notification.Builder(this, CHANNEL_ID)
                 .setContentTitle("Foreground Service")
@@ -199,11 +172,12 @@ public class UdpSenderService extends Service implements SensorEventListener {
         startForeground(1, notification);
     }
 
+    @SuppressLint("WakelockTimeout")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         stop();
-        PowerManager.WakeLock wl = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "freepie send lock");
-        WifiManager.WifiLock nl = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "freepie network lock");
+        PowerManager.WakeLock wl = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "de.z-byte.freepie:send-lock");
+        WifiManager.WifiLock nl = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "de.z-byte.freepie:network-lock");
         registerReceiver(screen_off_receiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
         deviceIndex = intent.getByteExtra("deviceIndex", (byte) 0);
@@ -218,37 +192,33 @@ public class UdpSenderService extends Service implements SensorEventListener {
 
         running = true;
 
-        worker = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    socket = new DatagramSocket();
-                    p.setAddress(InetAddress.getByName(ip));
-                    p.setPort(port);
-                } catch (Exception e) {
-                    Log.e("Error", "Can't create endpoint " + e.getMessage() + " " + ip + ":" + port);
-                    setLastError("Can't create endpoint " + e.getMessage());
-                    running = false;
-                    return;
-                }
-
-                while (running) {
-                    try {
-                        while (running) {
-                            synchronized (this_) {
-                                this_.wait();
-                                Send();
-                            }
-                        }
-                    } catch (InterruptedException ignored) {
-                    } catch (IOException ignored) {
-                    }
-                }
-                try {
-                    socket.disconnect();
-                } catch (Exception ignored) {
-                }
-                socket = null;
+        worker = new Thread(() -> {
+            try {
+                socket = new DatagramSocket();
+                p.setAddress(InetAddress.getByName(ip));
+                p.setPort(port);
+            } catch (Exception e) {
+                Log.e("Error", "Can't create endpoint " + e.getMessage() + " " + ip + ":" + port);
+                running = false;
+                return;
             }
+
+            while (running) {
+                try {
+                    while (running) {
+                        synchronized (this_) {
+                            this_.wait();
+                            Send();
+                        }
+                    }
+                } catch (InterruptedException | IOException ignored) {
+                }
+            }
+            try {
+                socket.disconnect();
+            } catch (Exception ignored) {
+            }
+            socket = null;
         });
 
         worker.start();
@@ -273,7 +243,7 @@ public class UdpSenderService extends Service implements SensorEventListener {
 
     private int put_float(float f, int pos, byte[] buf) {
         int tmp = Float.floatToIntBits(f);
-        buf[pos++] = (byte) (tmp >> 0);
+        buf[pos++] = (byte) (tmp);
         buf[pos++] = (byte) (tmp >> 8);
         buf[pos++] = (byte) (tmp >> 16);
         buf[pos++] = (byte) (tmp >> 24);
@@ -316,10 +286,6 @@ public class UdpSenderService extends Service implements SensorEventListener {
         socket.send(p);
     }
 
-    public boolean isRunning() {
-        return running;
-    }
-
     public void onSensorChanged(SensorEvent sensorEvent) {
         synchronized (this) {
             switch (sensorEvent.sensor.getType()) {
@@ -351,9 +317,6 @@ public class UdpSenderService extends Service implements SensorEventListener {
         }
     }
 
-    public class MyBinder extends Binder {
-        UdpSenderService getService() {
-            return UdpSenderService.this;
-        }
+    public static class MyBinder extends Binder {
     }
 }

@@ -1,5 +1,9 @@
 package com.wishsalad.wishimu;
 
+import androidx.annotation.NonNull;
+
+import java.util.Locale;
+
 public class DeviceIndex {
     private final byte index;
 
@@ -11,7 +15,8 @@ public class DeviceIndex {
         return index;
     }
 
+    @NonNull
     public String toString() {
-        return String.format("Device index %d", index);
+        return String.format(Locale.getDefault(), "Device index %d", index);
     }
 }

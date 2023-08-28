@@ -1,5 +1,7 @@
 package com.wishsalad.wishimu;
 
+import androidx.annotation.NonNull;
+
 public class SampleRate {
     private final int id;
     private final String name;
@@ -13,6 +15,7 @@ public class SampleRate {
         return id;
     }
 
+    @NonNull
     public String toString() {
         return name;
     }

@@ -6,22 +6,18 @@ import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
 
 public class MainActivity extends Activity {
 
@@ -32,10 +28,7 @@ public class MainActivity extends Activity {
     private static final String SEND_RAW = "send_raw";
     private static final String SAMPLE_RATE = "sample_rate";
 
-    private static final String DEBUG_FORMAT = "%.2f;%.2f;%.2f";
-    private final Timer t = new Timer();
     private ToggleButton start;
-    private TextView lblIP;
     private EditText txtIp;
     private EditText txtPort;
     private Spinner spnIndex;
@@ -44,10 +37,6 @@ public class MainActivity extends Activity {
     private Spinner spnSampleRate;
     private CheckBox chkDebug;
     private LinearLayout debugView;
-    private TextView acc;
-    private TextView gyr;
-    private TextView mag;
-    private TextView imu;
     private LinearLayout emptyLayout;
     private boolean isServiceRunning;
 
@@ -69,10 +58,6 @@ public class MainActivity extends Activity {
         start = findViewById(R.id.start);
         debugView = findViewById(R.id.debugView);
         chkDebug = findViewById(R.id.debug);
-        acc = findViewById(R.id.acc);
-        gyr = findViewById(R.id.gyr);
-        mag = findViewById(R.id.mag);
-        imu = findViewById(R.id.imu);
 
         txtIp.setText(preferences.getString(IP, "192.168.1.1"));
         txtPort.setText(preferences.getString(PORT, "5555"));
@@ -82,42 +67,32 @@ public class MainActivity extends Activity {
         populateSampleRates(preferences.getInt(SAMPLE_RATE, 0));
         populateIndex(preferences.getInt(INDEX, 0));
 
-        chkDebug.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setDebugVisibility(chkDebug.isChecked());
-            }
-        });
+        chkDebug.setOnClickListener(view -> setDebugVisibility(chkDebug.isChecked()));
 
         setDebugVisibility(chkDebug.isChecked());
 
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
         isServiceRunning = false;
 
-        start.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                save();
-                if (!isServiceRunning) {
-                    String ip = txtIp.getText().toString();
-                    int port = Integer.parseInt(txtPort.getText().toString());
-                    boolean sendOrientation = chkSendOrientation.isChecked();
-                    boolean sendRaw = chkSendRaw.isChecked();
-                    startUdpSenderService(ip, port, getSelectedDeviceIndex(), sendOrientation, sendRaw, getSelectedSampleRateId());
-                    isServiceRunning = true;
-                } else {
-                    stopUdpSenderService();
-                    isServiceRunning = false;
-                }
-
-                start.setChecked(isServiceRunning);
-                txtIp.setEnabled(!isServiceRunning);
-                txtPort.setEnabled(!isServiceRunning);
-                chkSendOrientation.setEnabled(!isServiceRunning);
-                chkSendRaw.setEnabled(!isServiceRunning);
-                emptyLayout.requestFocus();
+        start.setOnClickListener(view -> {
+            save();
+            if (!isServiceRunning) {
+                String ip = txtIp.getText().toString();
+                int port = Integer.parseInt(txtPort.getText().toString());
+                boolean sendOrientation = chkSendOrientation.isChecked();
+                boolean sendRaw = chkSendRaw.isChecked();
+                startUdpSenderService(ip, port, getSelectedDeviceIndex(), sendOrientation, sendRaw, getSelectedSampleRateId());
+                isServiceRunning = true;
+            } else {
+                stopUdpSenderService();
+                isServiceRunning = false;
             }
+
+            start.setChecked(isServiceRunning);
+            txtIp.setEnabled(!isServiceRunning);
+            txtPort.setEnabled(!isServiceRunning);
+            chkSendOrientation.setEnabled(!isServiceRunning);
+            chkSendRaw.setEnabled(!isServiceRunning);
+            emptyLayout.requestFocus();
         });
 
         emptyLayout.requestFocus();
@@ -127,7 +102,6 @@ public class MainActivity extends Activity {
         try {
             DatagramPacket p = new DatagramPacket(new byte[]{}, 0);
 
-            DatagramSocket socket = new DatagramSocket();
             p.setAddress(InetAddress.getByName(toIp));
             p.setPort(port);
         } catch (Exception e) {
@@ -154,7 +128,7 @@ public class MainActivity extends Activity {
     }
 
     private void populateIndex(int defaultIndex) {
-        List<DeviceIndex> deviceIndexes = new ArrayList<DeviceIndex>();
+        List<DeviceIndex> deviceIndexes = new ArrayList<>();
         for (byte index = 0; index < 16; index++) {
             deviceIndexes.add(new DeviceIndex(index));
         }
@@ -189,7 +163,7 @@ public class MainActivity extends Activity {
     }
 
     private <T> void populateSpinner(Spinner spinner, List<T> items, T selectedItem) {
-        ArrayAdapter<T> adapter = new ArrayAdapter<T>(this,
+        ArrayAdapter<T> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, items);
         spinner.setAdapter(adapter);
         spinner.setSelection(items.indexOf(selectedItem), false);
@@ -202,16 +176,6 @@ public class MainActivity extends Activity {
     private byte getSelectedDeviceIndex() {
         return ((DeviceIndex) spnIndex.getSelectedItem()).getIndex();
     }
-//
-//    private void debugRaw(float[] acc, float[] gyr, float[] mag) {
-//        this.acc.setText(String.format(DEBUG_FORMAT, acc[0], acc[1], acc[2]));
-//        this.gyr.setText(String.format(DEBUG_FORMAT, gyr[0], gyr[1], gyr[2]));
-//        this.mag.setText(String.format(DEBUG_FORMAT, mag[0], mag[1], mag[2]));
-//    }
-//
-//    private void debugImu(float[] imu) {
-//        this.imu.setText(String.format(DEBUG_FORMAT, imu[0], imu[1], imu[2]));
-//    }
 
     private void save() {
         final SharedPreferences preferences = getPreferences(MODE_PRIVATE);
@@ -223,37 +187,6 @@ public class MainActivity extends Activity {
                 .putBoolean(SEND_ORIENTATION, chkSendOrientation.isChecked())
                 .putBoolean(SEND_RAW, chkSendRaw.isChecked())
                 .putInt(SAMPLE_RATE, getSelectedSampleRateId())
-                .commit();
+                .apply();
     }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        chkDebug.setChecked(false);
-//        setDebugVisibility(false);
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        chkDebug.setChecked(false);
-//        setDebugVisibility(false);
-//        if (isServiceRunning)
-//            stopUdpSenderService();
-//        save();
-//    }
-//
-//    public void error(final String text) {
-//        final Activity activity = this;
-//
-//        new AlertDialog.Builder(activity).setTitle("Error").setMessage(text).setNeutralButton("OK", null).show();
-//        if (isServiceRunning) {
-//            stopUdpSenderService();
-//            start.setChecked(false);
-//            txtIp.setEnabled(true);
-//            txtPort.setEnabled(true);
-//            chkSendOrientation.setEnabled(true);
-//            chkSendRaw.setEnabled(true);
-//        }
-//    }
 }

@@ -23,9 +23,9 @@
             android:id="@+id/lblIp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:padding="@dimen/padding_medium"
             android:text="@string/target_ip" />
 
@@ -34,18 +34,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/lblIp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:ems="10"
-            android:inputType="text"></EditText>
+            android:inputType="text"
+            android:autofillHints="" />
 
         <TextView
             android:id="@+id/lblPort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/ip"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:padding="@dimen/padding_medium"
             android:text="@string/target_port" />
 
@@ -54,26 +55,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/lblPort"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:ems="10"
-            android:inputType="number" />
+            android:inputType="number"
+            android:autofillHints="" />
 
         <Spinner
             android:id="@+id/index"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/port"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true" />
 
         <CheckBox
             android:id="@+id/sendOrientation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/index"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:text="@string/send_orientation" />
 
         <CheckBox
@@ -81,8 +83,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/sendOrientation"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:text="@string/send_raw" />
 
         <Spinner
@@ -90,25 +92,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/sendRaw"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true" />
 
         <ToggleButton
             android:id="@+id/start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/sampleRate"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:text="@string/start"></ToggleButton>
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/start" />
 
         <CheckBox
             android:id="@+id/debug"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/start"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:text="@string/debug" />
 
         <LinearLayout
@@ -116,8 +118,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/debug"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:orientation="vertical">
 
@@ -126,7 +128,6 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/TextView02"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/padding_medium"
@@ -145,7 +146,6 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/TextView03"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/padding_medium"
@@ -164,7 +164,6 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/TextView04"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/padding_medium"
@@ -183,7 +182,6 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/TextView05"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/padding_medium"

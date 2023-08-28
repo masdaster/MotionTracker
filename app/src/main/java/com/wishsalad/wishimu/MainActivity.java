@@ -1,15 +1,6 @@
 package com.wishsalad.wishimu;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.SensorManager;
@@ -24,6 +15,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+
 public class MainActivity extends Activity {
 
     private static final String IP = "ip";
@@ -34,7 +33,7 @@ public class MainActivity extends Activity {
     private static final String SAMPLE_RATE = "sample_rate";
 
     private static final String DEBUG_FORMAT = "%.2f;%.2f;%.2f";
-
+    private final Timer t = new Timer();
     private ToggleButton start;
     private TextView lblIP;
     private EditText txtIp;
@@ -50,9 +49,6 @@ public class MainActivity extends Activity {
     private TextView mag;
     private TextView imu;
     private LinearLayout emptyLayout;
-
-    private Timer t = new Timer();
-
     private boolean isServiceRunning;
 
     @Override
@@ -62,21 +58,21 @@ public class MainActivity extends Activity {
 
         final SharedPreferences preferences = getPreferences(MODE_PRIVATE);
 
-        emptyLayout = (LinearLayout) findViewById(R.id.empty_layout);
+        emptyLayout = findViewById(R.id.empty_layout);
 
-        txtIp = (EditText) findViewById(R.id.ip);
-        txtPort = (EditText) findViewById(R.id.port);
-        spnIndex = (Spinner) findViewById(R.id.index);
-        chkSendOrientation = (CheckBox) findViewById(R.id.sendOrientation);
-        chkSendRaw = (CheckBox) findViewById(R.id.sendRaw);
-        spnSampleRate = (Spinner) this.findViewById(R.id.sampleRate);
-        start = (ToggleButton) findViewById(R.id.start);
-        debugView = (LinearLayout) findViewById(R.id.debugView);
-        chkDebug = (CheckBox) findViewById(R.id.debug);
-        acc = (TextView) findViewById(R.id.acc);
-        gyr = (TextView) findViewById(R.id.gyr);
-        mag = (TextView) findViewById(R.id.mag);
-        imu = (TextView) findViewById(R.id.imu);
+        txtIp = findViewById(R.id.ip);
+        txtPort = findViewById(R.id.port);
+        spnIndex = findViewById(R.id.index);
+        chkSendOrientation = findViewById(R.id.sendOrientation);
+        chkSendRaw = findViewById(R.id.sendRaw);
+        spnSampleRate = this.findViewById(R.id.sampleRate);
+        start = findViewById(R.id.start);
+        debugView = findViewById(R.id.debugView);
+        chkDebug = findViewById(R.id.debug);
+        acc = findViewById(R.id.acc);
+        gyr = findViewById(R.id.gyr);
+        mag = findViewById(R.id.mag);
+        imu = findViewById(R.id.imu);
 
         txtIp.setText(preferences.getString(IP, "192.168.1.1"));
         txtPort.setText(preferences.getString(PORT, "5555"));
@@ -129,13 +125,12 @@ public class MainActivity extends Activity {
 
     private void startUdpSenderService(String toIp, int port, byte deviceIndex, boolean sendOrientation, boolean sendRaw, int sampleRate) {
         try {
-            DatagramPacket p = new DatagramPacket(new byte[] {}, 0);
+            DatagramPacket p = new DatagramPacket(new byte[]{}, 0);
 
             DatagramSocket socket = new DatagramSocket();
             p.setAddress(InetAddress.getByName(toIp));
             p.setPort(port);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Log.e("Error", "Can't create endpoint " + e.getMessage());
         }
 
@@ -177,12 +172,10 @@ public class MainActivity extends Activity {
 
     private void populateSampleRates(int defaultSampleRate) {
         // delay information from http://developer.android.com/guide/topics/sensors/sensors_overview.html#sensors-monitor
-        List<SampleRate> sampleRates = Arrays.asList(new SampleRate[]{
-                new SampleRate(SensorManager.SENSOR_DELAY_NORMAL, "Slowest - 5 FPS"),
+        List<SampleRate> sampleRates = Arrays.asList(new SampleRate(SensorManager.SENSOR_DELAY_NORMAL, "Slowest - 5 FPS"),
                 new SampleRate(SensorManager.SENSOR_DELAY_UI, "Average - 16 FPS"),
                 new SampleRate(SensorManager.SENSOR_DELAY_GAME, "Fast - 50 FPS"),
-                new SampleRate(SensorManager.SENSOR_DELAY_FASTEST, "Fastest - no delay")
-        });
+                new SampleRate(SensorManager.SENSOR_DELAY_FASTEST, "Fastest - no delay"));
 
         SampleRate selectedSampleRate = null;
         for (SampleRate sampleRate : sampleRates) {

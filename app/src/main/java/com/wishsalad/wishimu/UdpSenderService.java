@@ -25,42 +25,33 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class UdpSenderService extends Service implements SensorEventListener {
-    private final IBinder mBinder = new MyBinder();
-    private PowerManager mPowerManager;
-    private WifiManager mWifiManager;
-
+    public static final String CHANNEL_ID = "ForegroundServiceChannel";
     private static final byte SEND_RAW = 0x01;
     private static final byte SEND_ORIENTATION = 0x02;
     private static final byte SEND_NONE = 0x00;
-
+    final float[] rotationMatrix = new float[16];
+    private final IBinder mBinder = new MyBinder();
+    private final DatagramPacket p = new DatagramPacket(new byte[]{}, 0);
+    private final byte[] buf = new byte[50];
     float[] acc = new float[]{0, 0, 0};
     float[] mag = new float[]{0, 0, 0};
     float[] gyr = new float[]{0, 0, 0};
     float[] imu = new float[]{0, 0, 0};
-
     float[] rotationVector = new float[3];
-    final float[] rotationMatrix = new float[16];
-
-    float[] R_ = new float[] {0,0,0, 0,0,0, 0,0,0};
-    float[] I = new float[] {0,0,0, 0,0,0, 0,0,0};
-
+    float[] R_ = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+    float[] I = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
     DatagramSocket socket;
     byte deviceIndex;
     boolean sendOrientation;
     boolean sendRaw;
-    private int sampleRate;
-    private SensorManager sensorManager;
-
     Thread worker;
     volatile boolean running;
+    private PowerManager mPowerManager;
+    private WifiManager mWifiManager;
+    private int sampleRate;
+    private SensorManager sensorManager;
     private boolean hasGyro;
-    private WifiManager.WifiLock wifiLock;
-    private PowerManager.WakeLock wakeLock;
-    private DatagramPacket p = new DatagramPacket(new byte[] {}, 0);
-
-    private String lastError;
-
-    private BroadcastReceiver screen_off_receiver = new BroadcastReceiver() {
+    private final BroadcastReceiver screen_off_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
@@ -68,6 +59,9 @@ public class UdpSenderService extends Service implements SensorEventListener {
             }
         }
     };
+    private WifiManager.WifiLock wifiLock;
+    private PowerManager.WakeLock wakeLock;
+    private String lastError;
 
     public void register_sensors() {
         sensorManager.unregisterListener(this);
@@ -114,10 +108,8 @@ public class UdpSenderService extends Service implements SensorEventListener {
         }
     }
 
-    public String debug(float[] acc_, float[] mag_, float[] gyr_, float[] imu_)
-    {
-        synchronized (this)
-        {
+    public String debug(float[] acc_, float[] mag_, float[] gyr_, float[] imu_) {
+        synchronized (this) {
             System.arraycopy(acc, 0, acc_, 0, 3);
             System.arraycopy(mag, 0, mag_, 0, 3);
             System.arraycopy(gyr, 0, gyr_, 0, 3);
@@ -134,12 +126,6 @@ public class UdpSenderService extends Service implements SensorEventListener {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    public class MyBinder extends Binder {
-        UdpSenderService getService() {
-            return UdpSenderService.this;
-        }
     }
 
     @Override
@@ -161,7 +147,8 @@ public class UdpSenderService extends Service implements SensorEventListener {
     public void stop() {
         try {
             unregisterReceiver(screen_off_receiver);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         if (wakeLock != null) {
             wakeLock.release();
             wakeLock = null;
@@ -188,8 +175,6 @@ public class UdpSenderService extends Service implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
-    public static final String CHANNEL_ID = "ForegroundServiceChannel";
-
     private void enableNotification() {
         NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
@@ -215,18 +200,17 @@ public class UdpSenderService extends Service implements SensorEventListener {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
-    {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         stop();
         PowerManager.WakeLock wl = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "freepie send lock");
         WifiManager.WifiLock nl = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "freepie network lock");
         registerReceiver(screen_off_receiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
         deviceIndex = intent.getByteExtra("deviceIndex", (byte) 0);
-        final int port =  intent.getIntExtra("port", 5555);
-        final String ip =  intent.getStringExtra("toIp");
+        final int port = intent.getIntExtra("port", 5555);
+        final String ip = intent.getStringExtra("toIp");
 
-        sendRaw =  intent.getBooleanExtra("sendRaw", true);
+        sendRaw = intent.getBooleanExtra("sendRaw", true);
         sendOrientation = intent.getBooleanExtra("sendOrientation", true);
         sampleRate = intent.getIntExtra("sampleRate", 0);
 
@@ -235,20 +219,19 @@ public class UdpSenderService extends Service implements SensorEventListener {
         running = true;
 
         worker = new Thread(new Runnable() {
-            public void run(){
+            public void run() {
                 try {
                     socket = new DatagramSocket();
                     p.setAddress(InetAddress.getByName(ip));
                     p.setPort(port);
-                }
-                catch(Exception e) {
+                } catch (Exception e) {
                     Log.e("Error", "Can't create endpoint " + e.getMessage() + " " + ip + ":" + port);
                     setLastError("Can't create endpoint " + e.getMessage());
                     running = false;
                     return;
                 }
 
-                while(running) {
+                while (running) {
                     try {
                         while (running) {
                             synchronized (this_) {
@@ -256,14 +239,14 @@ public class UdpSenderService extends Service implements SensorEventListener {
                                 Send();
                             }
                         }
+                    } catch (InterruptedException ignored) {
+                    } catch (IOException ignored) {
                     }
-                    catch (InterruptedException ignored) {}
-                    catch (IOException ignored) {}
                 }
-                try  {
+                try {
                     socket.disconnect();
+                } catch (Exception ignored) {
                 }
-                catch(Exception ignored)  {}
                 socket = null;
             }
         });
@@ -284,19 +267,16 @@ public class UdpSenderService extends Service implements SensorEventListener {
     }
 
     private byte getFlagByte(boolean raw, boolean orientation) {
-        return (byte)((raw ? SEND_RAW : SEND_NONE) |
+        return (byte) ((raw ? SEND_RAW : SEND_NONE) |
                 (orientation ? SEND_ORIENTATION : SEND_NONE));
     }
 
-    private byte[] buf = new byte[50];
-
-    private int put_float(float f, int pos, byte[] buf)
-    {
+    private int put_float(float f, int pos, byte[] buf) {
         int tmp = Float.floatToIntBits(f);
-        buf[pos++] = (byte)(tmp >> 0);
-        buf[pos++] = (byte)(tmp >> 8);
-        buf[pos++] = (byte)(tmp >> 16);
-        buf[pos++] = (byte)(tmp >> 24);
+        buf[pos++] = (byte) (tmp >> 0);
+        buf[pos++] = (byte) (tmp >> 8);
+        buf[pos++] = (byte) (tmp >> 16);
+        buf[pos++] = (byte) (tmp >> 24);
         return pos;
     }
 
@@ -368,6 +348,12 @@ public class UdpSenderService extends Service implements SensorEventListener {
             }
 
             notifyAll();
+        }
+    }
+
+    public class MyBinder extends Binder {
+        UdpSenderService getService() {
+            return UdpSenderService.this;
         }
     }
 }

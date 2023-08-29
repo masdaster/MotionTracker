@@ -15,10 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".UdpSenderService"
+            android:name="io.github.masdaster.motion_tracker.UdpSenderService"
             android:enabled="true"
             android:exported="false" />
-        <activity android:name=".MainActivity"
+        <activity android:name="io.github.masdaster.motion_tracker.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

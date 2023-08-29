@@ -1,4 +1,4 @@
-package com.wishsalad.wishimu;
+package io.github.masdaster.motion_tracker;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;

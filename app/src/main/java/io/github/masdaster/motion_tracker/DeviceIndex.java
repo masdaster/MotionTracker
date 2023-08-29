@@ -1,4 +1,4 @@
-package com.wishsalad.wishimu;
+package io.github.masdaster.motion_tracker;
 
 import androidx.annotation.NonNull;
 

@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdk 33
     defaultConfig {
-        applicationId "com.wishsalad.wishimu"
+        applicationId "io.github.masdaster.motion_tracker"
         minSdkVersion 28
         targetSdkVersion 29
         versionCode 1
@@ -16,7 +16,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    namespace 'com.wishsalad.wishimu'
+    namespace 'io.github.masdaster.motion_tracker'
 }
 
 dependencies {

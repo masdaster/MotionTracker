@@ -1,15 +1,28 @@
 <resources>
-
     <string name="app_name">Motion Tracker</string>
-    <string name="target_ip">Target IP</string>
-    <string name="target_port">Target port</string>
-    <string name="start">Start</string>
-    <string name="send_raw">Send raw data</string>
-    <string name="send_orientation">Send orientation</string>
-    <string name="acc">Accelerometer</string>
-    <string name="debug">Debug</string>
-    <string name="gyr">Gyro</string>
-    <string name="mag">Magnetometer</string>
-    <string name="imu">Orientation</string>
 
+    <string name="foreground_service_notification_channel_name">Dienst-Status</string>
+    <string name="foreground_service_notification_channel_description">Aktueller Status des Dienstes zur Bewegungserfassung</string>
+
+    <string name="startService">Dienst starten</string>
+    <string name="stopService">Dienst beenden</string>
+    <string name="service_is_running">Dienst zur Bewegungserfassung ist aktiviert</string>
+
+    <string name="invalid_ip">IP-Adresse ungültig</string>
+    <string name="invalid_port">Portnummer ungültig</string>
+    <string name="invalid_server_device_index">Gerätenummer ungültig</string>
+    <string name="invalid_sensor_sample_rate">Erfassungsfrequenz ungültig</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_preferences">Einstellungen</string>
+
+    <string name="preference_category_server_title">Server (OpenTrack)</string>
+    <string name="preference_category_sensor_title">Bewegungserfassung</string>
+
+    <string name="preference_server_ip_title">IP-Adresse</string>
+    <string name="preference_server_port_title">Port</string>
+    <string name="preference_server_device_index_title">Gerätenummer</string>
+    <string name="preference_server_device_index_summary">Nummer dieses Geräts zum Erfassen der Bewegungen</string>
+    <string name="preference_sensor_type_title">Sensortyp</string>
+    <string name="preference_sensor_sample_rate_title">Erfassungsfrequenz</string>
 </resources>

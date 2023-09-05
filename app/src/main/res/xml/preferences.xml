@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        app:key="server"
+        app:title="@string/preference_category_server_title">
+        <EditTextPreference
+            app:key="server_ip"
+            app:title="@string/preference_server_ip_title" />
+        <EditTextPreference
+            app:key="server_port"
+            app:title="@string/preference_server_port_title" />
+        <SeekBarPreference
+            android:max="16"
+            app:key="server_device_index"
+            app:min="0"
+            app:showSeekBarValue="true"
+            app:summary="@string/preference_server_device_index_summary"
+            app:title="@string/preference_server_device_index_title" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        app:key="sensor"
+        app:title="@string/preference_category_sensor_title">
+        <ListPreference
+            app:entries="@array/sensor_type_titles"
+            app:entryValues="@array/sensor_type_keys"
+            app:key="sensor_type"
+            app:title="@string/preference_sensor_type_title" />
+        <ListPreference
+            app:entries="@array/sensor_sample_rate_titles"
+            app:entryValues="@array/sensor_sample_rate_keys"
+            app:key="sensor_sample_rate"
+            app:title="@string/preference_sensor_sample_rate_title" />
+    </PreferenceCategory>
+</PreferenceScreen>

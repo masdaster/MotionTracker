@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sensor_type_keys">
+        <item>raw</item>
+        <item>basic</item>
+        <item>rotation_vector</item>
+    </string-array>
+    <string-array name="sensor_type_titles">
+        <item>Basiswerte (Lage-, Gyroskop-, Magnetsensor)</item>
+        <item>Lage- &amp; Magnetsensor</item>
+        <item>Systemeigener Rotationsvektor</item>
+    </string-array>
+    <string-array name="sensor_sample_rate_keys">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+    <string-array name="sensor_sample_rate_titles">
+        <item>Slow (5 FPS)</item>
+        <item>Average (16 FPS)</item>
+        <item>Fast (50 FPS)</item>
+        <item>Fastest (no delay)</item>
+    </string-array>
+</resources>

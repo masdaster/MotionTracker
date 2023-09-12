@@ -90,9 +90,8 @@ abstract class SyncFusionBaseOrientationProvider implements OrientationProviderS
      */
     private final Quaternion deltaQuaternion = new Quaternion();
     /**
-     * Some temporary variables to save allocations
+     * Temporary variable to save allocations
      */
-    private final float[] temporaryQuaternion = new float[4];
     private final Quaternion correctedQuaternion = new Quaternion();
     /**
      * Value giving the total velocity of the gyroscope (will be high, when the device is moving fast and low when
@@ -131,12 +130,8 @@ abstract class SyncFusionBaseOrientationProvider implements OrientationProviderS
     @CallSuper
     public float[] calculate(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            // Process rotation vector (just safe it)
-            // Calculate angle. Starting with API_18, Android will provide this value as event.values[3], but if not, we have to calculate it manually.
-            SensorManager.getQuaternionFromVector(temporaryQuaternion, event.values);
-
             // Store in quaternion
-            quaternionRotationVector.setXYZW(temporaryQuaternion[1], temporaryQuaternion[2], temporaryQuaternion[3], -temporaryQuaternion[0]);
+            quaternionRotationVector.setXYZW(event.values[0], event.values[1], event.values[2], -event.values[3]);
             if (!positionInitialised) {
                 // Override
                 quaternionGyroscope.set(quaternionRotationVector);
@@ -231,9 +226,11 @@ abstract class SyncFusionBaseOrientationProvider implements OrientationProviderS
             }
             timestamp = event.timestamp;
         }
+        float[] orientation = new float[3];
         synchronized (synchronizationToken) {
-            return new float[]{currentOrientationQuaternion.getX(), currentOrientationQuaternion.getY(), currentOrientationQuaternion.getZ()};
+            SensorManager.getOrientation(currentOrientationRotationMatrix.matrix, orientation);
         }
+        return orientation;
     }
 
     @NonNull

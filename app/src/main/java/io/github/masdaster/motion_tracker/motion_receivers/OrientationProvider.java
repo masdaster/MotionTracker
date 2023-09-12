@@ -13,6 +13,8 @@ import io.github.masdaster.motion_tracker.motion_receivers.calculation_strategie
 import io.github.masdaster.motion_tracker.motion_receivers.calculation_strategies.OrientationProviderStrategy;
 import io.github.masdaster.motion_tracker.motion_receivers.calculation_strategies.RawOrientationProviderStrategy;
 import io.github.masdaster.motion_tracker.motion_receivers.calculation_strategies.RotationVectorOrientationProviderStrategy;
+import io.github.masdaster.motion_tracker.motion_receivers.calculation_strategies.SyncFusionEnhancedOrientationProvider;
+import io.github.masdaster.motion_tracker.motion_receivers.calculation_strategies.SyncFusionSimpleOrientationProvider;
 
 /**
  * Created by Z-Byte on .
@@ -40,6 +42,12 @@ public final class OrientationProvider implements SensorEventListener {
                 break;
             case "rotation_vector":
                 strategy = new RotationVectorOrientationProviderStrategy();
+                break;
+            case "sync_fusion_simple":
+                strategy = new SyncFusionSimpleOrientationProvider();
+                break;
+            case "sync_fusion_enhance":
+                strategy = new SyncFusionEnhancedOrientationProvider();
                 break;
             default:
                 logger.warning("Tag '" + orientationProviderStrategyTag + "' for orientation provider strategy is unknown.");
